@@ -1,0 +1,1462 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Filogenia Reptilia — Brasil 2022 · Guedes et al.</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --jade-deep:   #0c2e22;
+    --jade-mid:    #1e6e4f;
+    --jade-warm:   #3aaa7c;
+    --jade-pale:   #b8e8d2;
+    --jade-ghost:  #f0faf5;
+    --cream:       #f7fdf9;
+    --ink:         #0d1f17;
+    --muted:       #5a7d6c;
+    --border:      #bdd9ca;
+    --shadow:      0 2px 20px rgba(12,46,34,0.10);
+
+    --sp-bg:    #ffffff;
+    --ssp-bg:   #edf9f4;
+    --nf-bg:    #fff0f0;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--cream);
+    color: var(--ink);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ──────────────────────────────────── */
+  header {
+    background: var(--jade-deep);
+    color: white;
+    padding: 0;
+    border-bottom: 4px solid var(--jade-warm);
+    position: relative;
+    overflow: hidden;
+  }
+  header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      120deg,
+      transparent,
+      transparent 38px,
+      rgba(58,170,124,0.04) 38px,
+      rgba(58,170,124,0.04) 40px
+    );
+    pointer-events: none;
+  }
+  .header-inner {
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    gap: 22px;
+    padding: 26px 40px 22px;
+    max-width: 1520px;
+    margin: 0 auto;
+  }
+  header .logo {
+    font-family: 'Crimson Pro', serif;
+    font-size: 2.25rem;
+    line-height: 1;
+    letter-spacing: -0.3px;
+    font-weight: 700;
+  }
+  header .logo span { color: var(--jade-warm); }
+  header .logo .class-tag {
+    font-size: 0.72rem;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--jade-pale);
+    display: block;
+    margin-bottom: 5px;
+    letter-spacing: 0.12em;
+    font-weight: 400;
+  }
+  header .subtitle {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--jade-pale);
+    margin-bottom: 3px;
+    letter-spacing: 0.04em;
+    opacity: 0.8;
+  }
+  header .badge {
+    margin-left: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--jade-pale);
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 8px;
+    padding: 6px 14px;
+    align-self: center;
+    letter-spacing: 0.05em;
+    line-height: 1.6;
+    text-align: right;
+  }
+  header .badge strong { display: block; font-size: 1.1rem; color: white; font-family: 'DM Sans', sans-serif; font-weight: 500; }
+
+  main {
+    max-width: 1520px;
+    margin: 0 auto;
+    padding: 32px 32px 70px;
+  }
+
+  /* ── CARDS ───────────────────────────────────── */
+  .card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 26px 30px;
+    margin-bottom: 22px;
+    box-shadow: var(--shadow);
+  }
+  .card-title {
+    font-family: 'Crimson Pro', serif;
+    font-size: 1.08rem;
+    color: var(--jade-deep);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card-title::before {
+    content: '';
+    display: inline-block;
+    width: 4px; height: 18px;
+    background: var(--jade-warm);
+    border-radius: 2px;
+  }
+
+  /* ── FILE ZONE ───────────────────────────────── */
+  .file-zone {
+    border: 2px dashed var(--border);
+    border-radius: 10px;
+    padding: 30px 22px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color .2s, background .2s;
+    position: relative;
+    max-width: 500px;
+    margin: 0 auto;
+  }
+  .file-zone:hover { border-color: var(--jade-warm); background: var(--jade-ghost); }
+  .file-zone.loaded { border-color: var(--jade-mid); border-style: solid; background: var(--jade-ghost); }
+  .file-zone input[type=file] {
+    position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+  }
+  .file-icon { font-size: 2.6rem; margin-bottom: 8px; }
+  .file-label { font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; color: var(--jade-mid); font-weight: 500; }
+  .file-status { font-size: 0.75rem; color: var(--muted); margin-top: 6px; min-height: 18px; }
+  .file-status.ok { color: var(--jade-mid); font-weight: 500; }
+  .file-hint { font-size: 0.7rem; color: var(--muted); margin-top: 10px; font-family: 'JetBrains Mono', monospace; }
+
+  /* ── SEARCH ──────────────────────────────────── */
+  .search-row { display: flex; gap: 16px; align-items: flex-start; }
+  textarea#names {
+    flex: 1;
+    height: 130px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.82rem;
+    color: var(--ink);
+    resize: vertical;
+    background: var(--jade-ghost);
+    outline: none;
+    transition: border-color .2s;
+  }
+  textarea#names:focus { border-color: var(--jade-warm); }
+  textarea#names::placeholder { color: #9abfb0; }
+
+  .btn-col { display: flex; flex-direction: column; gap: 10px; min-width: 180px; }
+
+  button {
+    padding: 12px 18px;
+    border: none;
+    border-radius: 9px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background .18s, transform .1s, opacity .2s;
+    display: flex; align-items: center; justify-content: center; gap: 7px;
+  }
+  button:active { transform: scale(0.97); }
+  button:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  #btn-search { background: var(--jade-mid); color: white; }
+  #btn-search:hover:not(:disabled) { background: var(--jade-deep); }
+
+  #btn-export { background: var(--jade-pale); color: var(--jade-deep); }
+  #btn-export:hover:not(:disabled) { background: var(--jade-warm); color: white; }
+
+  #btn-clear { background: #f0f5f2; color: var(--muted); font-size: 0.78rem; padding: 8px 16px; }
+  #btn-clear:hover:not(:disabled) { background: #deeee6; }
+
+  /* ── MODE BUTTONS ─────────────────────────────── */
+  .mode-btn {
+    padding: 7px 18px;
+    border: 2px solid var(--border);
+    border-radius: 99px;
+    background: white;
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all .18s;
+  }
+  .mode-btn:hover { border-color: var(--jade-warm); color: var(--jade-mid); }
+  .mode-btn.mode-active { background: var(--jade-mid); border-color: var(--jade-mid); color: white; }
+
+  /* ── STATS BAR ────────────────────────────────── */
+  #stats-bar {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-bottom: 10px;
+    min-height: 20px;
+    display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+  }
+  #stats-bar .pill {
+    background: var(--jade-pale);
+    color: var(--jade-deep);
+    border-radius: 99px;
+    padding: 2px 10px;
+    font-weight: 500;
+  }
+  #stats-bar .pill.red { background: #fdd; color: #8b0000; }
+
+  /* ── TABLE ────────────────────────────────────── */
+  .table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    max-height: 560px;
+  }
+  table {
+    border-collapse: collapse;
+    width: max-content;
+    min-width: 100%;
+    font-size: 0.77rem;
+  }
+  thead tr {
+    background: var(--jade-deep);
+    color: white;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+  }
+  thead th {
+    padding: 11px 13px;
+    text-align: left;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.67rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+    border-right: 1px solid rgba(255,255,255,0.1);
+  }
+  tbody tr { border-bottom: 1px solid var(--border); transition: background .1s; }
+  tbody tr:hover { filter: brightness(0.96); }
+
+  /* Rank row coloring */
+  tbody tr.rank-sp  { background: var(--sp-bg); }
+  tbody tr.rank-ssp { background: var(--ssp-bg); }
+  tbody tr.rank-nf  { background: var(--nf-bg); }
+
+  td {
+    padding: 8px 13px;
+    white-space: nowrap;
+    max-width: 260px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    border-right: 1px solid var(--border);
+    font-family: 'DM Sans', sans-serif;
+    color: var(--ink);
+  }
+  td:first-child {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--jade-mid);
+    font-weight: 500;
+  }
+
+  /* rank badge */
+  .rank-badge {
+    display: inline-block;
+    border-radius: 4px;
+    padding: 1px 7px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.67rem;
+    font-weight: 500;
+  }
+  .rank-species    { background: #d4ede0; color: #0c5c2e; }
+  .rank-subspecies { background: #c5e6d8; color: #0a4a24; }
+  .rank-other      { background: #e0e8ff; color: #1a2a80; }
+
+  /* ── LEGEND ───────────────────────────────────── */
+  .legend {
+    display: flex; gap: 14px; flex-wrap: wrap;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.73rem; color: var(--muted);
+    margin-top: 10px;
+  }
+  .legend-item { display: flex; align-items: center; gap: 5px; }
+  .legend-dot { width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0; }
+
+  /* ── SECTION DIVIDER ──────────────────────────── */
+  .section-label {
+    font-family: 'Crimson Pro', serif;
+    font-size: 1rem;
+    color: var(--jade-deep);
+    margin: 28px 0 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* ── LOADING ─────────────────────────────────── */
+  #loading {
+    display: none;
+    text-align: center;
+    padding: 24px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.82rem;
+    color: var(--jade-mid);
+  }
+  .spinner {
+    display: inline-block;
+    width: 18px; height: 18px;
+    border: 2px solid var(--jade-pale);
+    border-top-color: var(--jade-mid);
+    border-radius: 50%;
+    animation: spin .7s linear infinite;
+    vertical-align: middle;
+    margin-right: 8px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  #results-section { display: none; }
+  td[title] { cursor: default; }
+
+  /* ── COPY BTN ─────────────────────────────────── */
+  .btn-copy {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    margin-top: 10px;
+    padding: 9px 18px;
+    background: var(--jade-deep);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.73rem;
+    font-weight: 500;
+    cursor: pointer;
+    letter-spacing: 0.02em;
+    transition: background .18s, transform .1s;
+  }
+  .btn-copy:hover { background: var(--jade-mid); }
+  .btn-copy:active { transform: scale(0.97); }
+  .btn-copy.copied { background: #1a8a50; }
+
+  /* ── GLOSSARY ─────────────────────────────────── */
+  .info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px 30px;
+    font-size: 0.77rem;
+  }
+  @media(max-width:700px){ .info-grid { grid-template-columns: 1fr; } }
+  .info-section-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.67rem;
+    letter-spacing: 0.08em;
+    color: var(--jade-warm);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .info-items { display: flex; flex-wrap: wrap; gap: 5px 10px; }
+  .g-item {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 0.73rem;
+  }
+  .g-code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.67rem;
+    font-weight: 500;
+    background: var(--jade-pale);
+    color: var(--jade-deep);
+    border-radius: 4px;
+    padding: 1px 6px;
+  }
+
+  details.collapsible {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  details.collapsible summary {
+    padding: 13px 20px;
+    cursor: pointer;
+    font-family: 'Crimson Pro', serif;
+    font-size: 1rem;
+    color: var(--jade-deep);
+    background: var(--jade-ghost);
+    user-select: none;
+    list-style: none;
+    display: flex; align-items: center; gap: 8px;
+  }
+  details.collapsible summary::before {
+    content: '▶';
+    font-size: 0.7rem;
+    color: var(--jade-warm);
+    transition: transform .2s;
+  }
+  details[open].collapsible summary::before { transform: rotate(90deg); }
+  details.collapsible .details-body { padding: 18px 22px; }
+
+  /* ── SPECIES SUGGESTER ───────────────────────────── */
+  .suggester-wrap { position: relative; }
+  #suggester-panel {
+    display: none;
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1.5px solid var(--jade-warm);
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(12,46,34,0.18);
+    z-index: 100;
+    max-height: 320px;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+  #suggester-panel.visible { display: block; }
+  .sugg-header {
+    padding: 8px 14px 6px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.64rem;
+    letter-spacing: 0.07em;
+    color: var(--jade-warm);
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border);
+    background: var(--jade-ghost);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .sugg-close {
+    background: none; border: none; cursor: pointer; color: var(--muted);
+    font-size: 0.85rem; padding: 0 4px; line-height: 1;
+    font-family: 'DM Sans',sans-serif;
+  }
+  .sugg-item {
+    padding: 9px 14px;
+    display: flex; align-items: center; gap: 10px;
+    cursor: pointer;
+    border-bottom: 1px solid var(--border);
+    transition: background .12s;
+  }
+  .sugg-item:last-child { border-bottom: none; }
+  .sugg-item:hover, .sugg-item.sugg-active { background: var(--jade-ghost); }
+  .sugg-vernacular {
+    font-size: 0.8rem;
+    color: var(--ink);
+    font-weight: 400;
+    min-width: 140px;
+  }
+  .sugg-scientific {
+    font-size: 0.75rem;
+    font-style: italic;
+    color: var(--muted);
+    flex: 1;
+  }
+  .sugg-badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.62rem;
+    border-radius: 4px;
+    padding: 1px 6px;
+    background: var(--jade-pale);
+    color: var(--jade-deep);
+    white-space: nowrap;
+  }
+
+  /* ── NOTICE BAR ───────────────────────────────── */
+  .notice {
+    background: linear-gradient(135deg, #e8f7f0, #d0f0e4);
+    border: 1px solid var(--jade-pale);
+    border-radius: 10px;
+    padding: 14px 20px;
+    font-size: 0.8rem;
+    color: var(--jade-deep);
+    margin-bottom: 22px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .notice .ni { font-size: 1.1rem; flex-shrink: 0; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div>
+      <div class="logo">
+        <span class="class-tag">CLASS · REPTILIA</span>
+        <span>Répteis</span> do Brasil
+      </div>
+      <div class="subtitle">Powered By Brenno Benk · Utilize a base de dados alterada de Guedes et al. 2023, entre em contato com Brenno Benk para obter acesso</div>
+    </div>
+    <div class="badge">
+      <strong id="hdr-count">—</strong>
+      táxons disponíveis
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <div class="notice">
+    <span class="ni">🦎</span>
+    <span>Catálogo baseado em <strong>Guedes et al. (2023)</strong> — Répteis do Brasil 2022 e <strong>Amphibia Brasil v2021</strong>. Faça upload de um ou ambos os arquivos para ativar a busca. Dados no formato <strong>Darwin Core</strong>.</span>
+  </div>
+
+  <!-- STEP 1 -->
+  <div class="card">
+    <div class="card-title">1 · Carregar planilha de dados</div>
+    <div style="display:flex;gap:20px;flex-wrap:wrap;justify-content:center;">
+      <div class="file-zone" id="zone-xlsx">
+        <input type="file" id="file-xlsx" accept=".xlsx,.xls"/>
+        <div class="file-icon">🦎</div>
+        <div class="file-label">Reptilia_Brasil_2022_Guedes_etal.xlsx</div>
+        <div class="file-status" id="status-xlsx">Clique ou arraste o arquivo .xlsx</div>
+        <div class="file-hint">Aba utilizada: Reptilia Brasil 2022</div>
+      </div>
+      <div class="file-zone" id="zone-xlsx-a">
+        <input type="file" id="file-xlsx-a" accept=".xlsx,.xls"/>
+        <div class="file-icon">🐸</div>
+        <div class="file-label">Amphibia_Brasil_v2021.xlsx</div>
+        <div class="file-status" id="status-xlsx-a">Clique ou arraste o arquivo .xlsx</div>
+        <div class="file-hint">Aba utilizada: Amphibia Brasil 2021</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 2 -->
+  <div class="card">
+    <div class="card-title">2 · Buscar Táxons por Nome Científico, Nome Comum, Gênero, Família ou Ordem</div>
+    <div class="search-row">
+      <div class="suggester-wrap" style="flex:1;display:flex;flex-direction:column;">
+        <textarea id="names" placeholder="Cole aqui os nomes, um por linha...&#10;Ex: Caretta caretta&#10;tartaruga-cabeçuda&#10;Bothrops&#10;Colubridae&#10;Squamata"></textarea>
+        <div id="suggester-panel" role="listbox" aria-label="Sugestões de espécies">
+          <div class="sugg-header">
+            <span>🔎 Sugestões de táxons</span>
+            <span id="sugg-count"></span>
+            <button class="sugg-close" onclick="closeSuggester()" title="Fechar">✕</button>
+          </div>
+          <div id="sugg-list"></div>
+        </div>
+      </div>
+      <div class="btn-col">
+        <button id="btn-search" disabled onclick="runSearch()">🔍 Buscar</button>
+        <button id="btn-export" disabled onclick="exportExcel()">📥 Exportar Excel</button>
+        <button id="btn-clear" onclick="clearResults()">✕ Limpar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- LOADING -->
+  <div id="loading"><span class="spinner"></span>Processando…</div>
+
+  <!-- RESULTS -->
+  <div id="results-section">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap;">
+      <span style="font-family:'JetBrains Mono',monospace;font-size:0.72rem;color:var(--muted);">MODO DE EXIBIÇÃO</span>
+      <button id="btn-mode-one" class="mode-btn mode-active" onclick="setMode('one')">1 por linha</button>
+      <button id="btn-mode-all" class="mode-btn" onclick="setMode('all')">Todos os resultados</button>
+    </div>
+    <div id="stats-bar"></div>
+
+    <!-- TABLE 1: MAIN -->
+    <div class="section-label">Tabela 1 · Resultados da Busca</div>
+    <div class="card" style="padding:0; overflow:hidden;">
+      <div class="table-wrap">
+        <table id="result-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Busca</th>
+              <th>Tipo</th>
+              <th>Ordem</th>
+              <th>Família</th>
+              <th>Gênero</th>
+              <th>Epíteto Específico</th>
+              <th>Epíteto Infraespecífico</th>
+              <th>Qualificador</th>
+              <th>Nome Científico</th>
+              <th>Nome Popular</th>
+              <th>Rank</th>
+              <th>Observações (taxonRemarks)</th>
+              <th>Descritor</th>
+            </tr>
+          </thead>
+          <tbody id="result-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot" style="background:#d4ede0;border:1px solid #9acfb0"></div> species</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#c5e6d8;border:1px solid #7abfa0"></div> subspecies</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#fff0f0;border:1px solid #f5b8b8"></div> Não encontrado</div>
+    </div>
+    <div style="margin-top:10px;">
+      <button class="btn-copy" id="btn-copy-1" onclick="copyTable(1)">📋 Copiar Tabela 1 para Excel</button>
+    </div>
+
+    <!-- TABLE 2: DwC -->
+    <div class="section-label">Tabela 2 · Formato Darwin Core Completo</div>
+    <div class="card" style="padding:0; overflow:hidden;">
+      <div class="table-wrap">
+        <table id="result-table2">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>kingdom</th>
+              <th>phylum</th>
+              <th>class</th>
+              <th>order</th>
+              <th>family</th>
+              <th>genus</th>
+              <th>specificEpithet</th>
+              <th>infraspecificEpithet</th>
+              <th>identificationQualifier</th>
+              <th>scientificName</th>
+              <th>vernacularName</th>
+              <th>taxonRank</th>
+              <th>taxonRemarks</th>
+              <th>Descriptor</th>
+            </tr>
+          </thead>
+          <tbody id="result-body2"></tbody>
+        </table>
+      </div>
+    </div>
+    <div style="margin-bottom:30px;">
+      <button class="btn-copy" id="btn-copy-2" onclick="copyTable(2)">📋 Copiar Tabela 2 (DwC) para Excel</button>
+    </div>
+
+    <!-- TABLE 3: DwC sem busca (clean) -->
+    <div class="section-label">Tabela 3 · Darwin Core — Para Publicação (sem coluna de busca)</div>
+    <div class="card" style="padding:0; overflow:hidden;">
+      <div class="table-wrap">
+        <table id="result-table3">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>kingdom</th>
+              <th>phylum</th>
+              <th>class</th>
+              <th>order</th>
+              <th>family</th>
+              <th>genus</th>
+              <th>specificEpithet</th>
+              <th>infraspecificEpithet</th>
+              <th>identificationQualifier</th>
+              <th>scientificName</th>
+              <th>vernacularName</th>
+              <th>taxonRank</th>
+              <th>taxonRemarks</th>
+              <th>Descriptor</th>
+            </tr>
+          </thead>
+          <tbody id="result-body3"></tbody>
+        </table>
+      </div>
+    </div>
+    <div style="margin-bottom:30px;">
+      <button class="btn-copy" id="btn-copy-3" onclick="copyTable(3)">📋 Copiar Tabela 3 (DwC limpa) para Excel</button>
+    </div>
+
+  </div><!-- /results-section -->
+
+  <!-- INFO -->
+  <details class="collapsible" style="margin-bottom:22px;">
+    <summary>Sobre os Dados — Répteis do Brasil 2022</summary>
+    <div class="details-body">
+      <div class="info-grid">
+        <div>
+          <div class="info-section-title">Campos Darwin Core (DwC)</div>
+          <div class="info-items">
+            <span class="g-item"><span class="g-code">kingdom</span> Reino</span>
+            <span class="g-item"><span class="g-code">phylum</span> Filo</span>
+            <span class="g-item"><span class="g-code">class</span> Classe</span>
+            <span class="g-item"><span class="g-code">order</span> Ordem</span>
+            <span class="g-item"><span class="g-code">family</span> Família</span>
+            <span class="g-item"><span class="g-code">genus</span> Gênero</span>
+            <span class="g-item"><span class="g-code">specificEpithet</span> Epíteto específico</span>
+            <span class="g-item"><span class="g-code">infraspecificEpithet</span> Epíteto infra.</span>
+            <span class="g-item"><span class="g-code">identificationQualifier</span> Qualificador</span>
+            <span class="g-item"><span class="g-code">scientificName</span> Nome científico completo</span>
+            <span class="g-item"><span class="g-code">vernacularName</span> Nome popular</span>
+            <span class="g-item"><span class="g-code">taxonRank</span> Categoria taxonômica</span>
+            <span class="g-item"><span class="g-code">taxonRemarks</span> Observações</span>
+            <span class="g-item"><span class="g-code">Descriptor</span> Autor e ano</span>
+          </div>
+        </div>
+        <div>
+          <div class="info-section-title">Categorias Taxonômicas</div>
+          <div class="info-items">
+            <span class="g-item"><span class="rank-badge rank-species">species</span> Espécie</span>
+            <span class="g-item"><span class="rank-badge rank-subspecies">subspecies</span> Subespécie</span>
+            <span class="g-item"><span class="rank-badge rank-other">other</span> Outros táxons</span>
+          </div>
+          <div style="margin-top:18px;">
+            <div class="info-section-title">Tipos de Busca</div>
+            <div class="info-items">
+              <span class="g-item"><span class="g-code">Nome científico</span> Binômio exato</span>
+              <span class="g-item"><span class="g-code">Gênero</span> Todos da gen.</span>
+              <span class="g-item"><span class="g-code">Família</span> Toda a família</span>
+              <span class="g-item"><span class="g-code">Ordem</span> Toda a ordem</span>
+              <span class="g-item"><span class="g-code">Nome popular</span> Nome vernacular</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </details>
+
+</main>
+
+<script>
+// ── STATE ──────────────────────────────────────────────────────────────────
+let rawData  = [];
+let rawDataA = [];
+let dataLoaded  = false;
+let dataLoadedA = false;
+let lastResults = [];
+let displayMode = 'one';
+
+// Reptilia indexes
+let scientificIndex = new Map();
+let genusIndex      = new Map();
+let familyIndex     = new Map();
+let orderIndex      = new Map();
+let vernacularIndex = new Map();
+
+// Amphibia indexes
+let scientificIndexA = new Map();
+let genusIndexA      = new Map();
+let familyIndexA     = new Map();
+let orderIndexA      = new Map();
+let vernacularIndexA = new Map();
+
+function anyDataLoaded() { return dataLoaded || dataLoadedA; }
+function totalTaxons()   { return rawData.length + rawDataA.length; }
+
+// ── HELPERS ─────────────────────────────────────────────────────────────────
+function normalize(s) {
+  if (!s) return '';
+  return String(s).trim().toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+}
+
+function esc(s) {
+  if (!s) return '';
+  return String(s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function rankClass(rank) {
+  if (!rank) return 'rank-sp';
+  const r = String(rank).trim().toLowerCase();
+  if (r === 'species') return 'rank-sp';
+  if (r === 'subspecies') return 'rank-ssp';
+  return '';
+}
+
+function rankBadge(rank) {
+  if (!rank || String(rank).trim() === '') return '—';
+  const r = String(rank).trim().toLowerCase();
+  if (r === 'species')    return `<span class="rank-badge rank-species">species</span>`;
+  if (r === 'subspecies') return `<span class="rank-badge rank-subspecies">subspecies</span>`;
+  return `<span class="rank-badge rank-other">${esc(rank)}</span>`;
+}
+
+function cell(v, extra) {
+  const s = v ? String(v).trim() : '';
+  if (!s || s === 'NaN' || s === 'nan' || s === 'null' || s === 'undefined') return `<td${extra||''}>—</td>`;
+  const title = s.length > 40 ? ` title="${esc(s)}"` : '';
+  return `<td${title}${extra||''}>${esc(s)}</td>`;
+}
+
+// ── FILE LOADING ─────────────────────────────────────────────────────────────
+const fileInput  = document.getElementById('file-xlsx');
+const zone       = document.getElementById('zone-xlsx');
+const statusEl   = document.getElementById('status-xlsx');
+const fileInputA = document.getElementById('file-xlsx-a');
+const zoneA      = document.getElementById('zone-xlsx-a');
+const statusElA  = document.getElementById('status-xlsx-a');
+
+function loadXlsxFile(file, isAmphibia) {
+  const st      = isAmphibia ? statusElA : statusEl;
+  const zn      = isAmphibia ? zoneA     : zone;
+  const keyword = isAmphibia ? 'amphibia' : 'reptilia';
+  st.textContent = 'Lendo arquivo…';
+  st.className = 'file-status';
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const wb = XLSX.read(e.target.result, { type: 'array' });
+      const targetSheet = wb.SheetNames.find(n => n.toLowerCase().includes(keyword)) || wb.SheetNames[0];
+      const ws   = wb.Sheets[targetSheet];
+      const rawRows = XLSX.utils.sheet_to_json(ws, { defval: '' });
+      const data = isAmphibia ? normalizeAmphibiaRows(rawRows) : rawRows;
+      if (isAmphibia) {
+        rawDataA = data;
+        buildIndexesFor(rawDataA, scientificIndexA, genusIndexA, familyIndexA, orderIndexA, vernacularIndexA);
+        dataLoadedA = true;
+        zn.classList.add('loaded');
+        st.textContent = `✅ ${rawDataA.length.toLocaleString('pt-BR')} táxons carregados (aba: ${targetSheet})`;
+        st.className = 'file-status ok';
+      } else {
+        rawData = data;
+        buildIndexesFor(rawData, scientificIndex, genusIndex, familyIndex, orderIndex, vernacularIndex);
+        dataLoaded = true;
+        zn.classList.add('loaded');
+        st.textContent = `✅ ${rawData.length.toLocaleString('pt-BR')} táxons carregados (aba: ${targetSheet})`;
+        st.className = 'file-status ok';
+      }
+      document.getElementById('btn-search').disabled = !anyDataLoaded();
+      document.getElementById('hdr-count').textContent = totalTaxons().toLocaleString('pt-BR');
+      const ta = document.getElementById('names');
+      if (ta.value.trim()) runLiveSearch();
+    } catch(err) {
+      (isAmphibia ? statusElA : statusEl).textContent = '❌ Erro ao ler: ' + err.message;
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+fileInput.addEventListener('change', () => {
+  const file = fileInput.files[0];
+  if (file) loadXlsxFile(file, false);
+});
+
+fileInputA.addEventListener('change', () => {
+  const file = fileInputA.files[0];
+  if (file) loadXlsxFile(file, true);
+});
+
+
+// ── AMPHIBIA COLUMN NORMALIZER ───────────────────────────────────────────────
+// The Amphibia file uses non-DwC columns (BINOMIO, VERNACULAR NAME, GENERO…)
+// This maps them to the Darwin Core keys the rest of the code expects.
+function normalizeAmphibiaRows(data) {
+  return data
+    .filter(row => row['BINOMIO'] && String(row['BINOMIO']).trim())
+    .map(row => {
+      const autorRaw = String(row['AUTOR'] || '').trim();
+      const anoRaw   = String(row['ANO']   || '').trim();
+      const descritor = autorRaw && anoRaw ? autorRaw + ', ' + anoRaw
+                      : autorRaw || anoRaw;
+      // Genus = first word of BINOMIO when GENERO is empty
+      const binomio = String(row['BINOMIO'] || '').trim();
+      const genus   = String(row['GENERO']  || binomio.split(' ')[0] || '').trim();
+      const epithet = String(row['ESPECIE'] || binomio.split(' ').slice(1).join(' ') || '').trim();
+      return {
+        kingdom:                'Animalia',
+        phylum:                 'Chordata',
+        class:                  String(row['CLASSE'] || 'Amphibia').trim(),
+        order:                  String(row['ORDEM']  || '').trim(),
+        family:                 String(row['FAMILIA']|| '').trim(),
+        genus:                  genus,
+        specificEpithet:        epithet,
+        infraspecificEpithet:   '',
+        identificationQualifier:'',
+        scientificName:         binomio,
+        vernacularName:         String(row['VERNACULAR NAME'] || '').trim(),
+        taxonRank:              'species',
+        taxonRemarks:           String(row['STATUS'] || '').trim(),
+        descritor:              descritor,
+      };
+    });
+}
+
+// ── BUILD INDEXES ────────────────────────────────────────────────────────────
+function buildIndexesFor(data, sciIdx, genIdx, famIdx, ordIdx, vernIdx) {
+  sciIdx.clear(); genIdx.clear(); famIdx.clear(); ordIdx.clear(); vernIdx.clear();
+  for (const row of data) {
+    const sci = normalize(row['scientificName']);
+    if (sci) { if (!sciIdx.has(sci)) sciIdx.set(sci, []); sciIdx.get(sci).push(row); }
+    const gen = normalize(row['genus']);
+    if (gen) { if (!genIdx.has(gen)) genIdx.set(gen, []); genIdx.get(gen).push(row); }
+    const fam = normalize(row['family']);
+    if (fam) { if (!famIdx.has(fam)) famIdx.set(fam, []); famIdx.get(fam).push(row); }
+    const ord = normalize(row['order']);
+    if (ord) { if (!ordIdx.has(ord)) ordIdx.set(ord, []); ordIdx.get(ord).push(row); }
+    const nomes = String(row['vernacularName'] || '').split(/[,;|]+/);
+    for (const n of nomes) {
+      const key = normalize(n.trim());
+      if (!key) continue;
+      if (!vernIdx.has(key)) vernIdx.set(key, []);
+      vernIdx.get(key).push(row);
+    }
+  }
+}
+
+function buildIndexes() {
+  buildIndexesFor(rawData, scientificIndex, genusIndex, familyIndex, orderIndex, vernacularIndex);
+}
+
+// ── SEARCH ────────────────────────────────────────────────────────────────────
+function searchInIndexes(norm, sciIdx, genIdx, famIdx, ordIdx, vernIdx) {
+  if (sciIdx.has(norm))  return { rows: sciIdx.get(norm),  tipo: 'Nome científico' };
+  if (genIdx.has(norm))  return { rows: genIdx.get(norm),  tipo: 'Gênero' };
+  if (famIdx.has(norm))  return { rows: famIdx.get(norm),  tipo: 'Família' };
+  if (ordIdx.has(norm))  return { rows: ordIdx.get(norm),  tipo: 'Ordem' };
+  if (vernIdx.has(norm)) return { rows: vernIdx.get(norm), tipo: 'Nome popular' };
+  let rows = [], tipo = '';
+  for (const [key, arr] of vernIdx) {
+    if (key.includes(norm) && norm.length >= 4) { rows = [...rows, ...arr]; tipo = 'Nome popular (parcial)'; }
+  }
+  if (!rows.length) {
+    for (const [key, arr] of sciIdx) {
+      if (key.startsWith(norm) && norm.length >= 4) { rows = [...rows, ...arr]; tipo = 'Nome cient. (parcial)'; }
+    }
+  }
+  rows = [...new Map(rows.map(r => [r['scientificName'], r])).values()];
+  return { rows, tipo };
+}
+
+function searchName(name) {
+  const norm = normalize(name);
+  let rows = [], tipo = '';
+  if (dataLoaded) {
+    const r = searchInIndexes(norm, scientificIndex, genusIndex, familyIndex, orderIndex, vernacularIndex);
+    if (r.rows.length) { rows = r.rows; tipo = r.tipo; }
+  }
+  if (dataLoadedA) {
+    const r = searchInIndexes(norm, scientificIndexA, genusIndexA, familyIndexA, orderIndexA, vernacularIndexA);
+    if (r.rows.length) {
+      const existing = new Set(rows.map(x => x['scientificName']));
+      const newRows  = r.rows.filter(x => !existing.has(x['scientificName']));
+      rows = [...rows, ...newRows];
+      if (!tipo) tipo = r.tipo;
+    }
+  }
+  return { rows, tipo };
+}
+
+function buildResult(row, nomeDigitado, tipo) {
+  return {
+    nomeDigitado, tipo,
+    kingdom:               row['kingdom']               || '',
+    phylum:                row['phylum']                || '',
+    classRank:             row['class']                 || '',
+    order:                 row['order']                 || '',
+    family:                row['family']                || '',
+    genus:                 row['genus']                 || '',
+    specificEpithet:       row['specificEpithet']       || '',
+    infraspecificEpithet:  row['infraspecificEpithet']  || '',
+    identificationQualifier: row['identificationQualifier'] || '',
+    scientificName:        row['scientificName']        || '',
+    vernacularName:        row['vernacularName']        || '',
+    taxonRank:             row['taxonRank']             || '',
+    taxonRemarks:          row['taxonRemarks']          || '',
+    descritor:             row['descritor']             || '',
+  };
+}
+
+// ── RENDER TABLE 1 ────────────────────────────────────────────────────────────
+function renderTable(rows) {
+  const tbody = document.getElementById('result-body');
+  if (!rows.length) { tbody.innerHTML = ''; return; }
+
+  const html = rows.map((r, i) => {
+    const rc = r.statusBusca === 'Nao encontrado' ? 'rank-nf' : rankClass(r.taxonRank);
+    const firstNome = r.vernacularName ? r.vernacularName.split(/[,;|]/)[0].trim() : '';
+    return `<tr class="${rc}">
+      <td>${i+1}</td>
+      ${cell(r.nomeDigitado)}
+      <td><span style="font-family:'JetBrains Mono',monospace;font-size:0.69rem;color:var(--jade-mid)">${esc(r.tipo)}</span></td>
+      ${cell(r.order)}
+      ${cell(r.family)}
+      <td style="font-style:italic">${esc(r.genus)||'—'}</td>
+      <td style="font-style:italic">${esc(r.specificEpithet)||'—'}</td>
+      ${cell(r.infraspecificEpithet)}
+      ${cell(r.identificationQualifier)}
+      <td style="font-style:italic;font-weight:500" title="${esc(r.scientificName)}">${esc(r.scientificName.substring(0,55))||'—'}${r.scientificName.length>55?'…':''}</td>
+      <td title="${esc(r.vernacularName)}">${esc(firstNome)||'—'}</td>
+      <td>${rankBadge(r.taxonRank)}</td>
+      <td title="${esc(r.taxonRemarks)}">${esc(r.taxonRemarks.substring(0,50))||'—'}${r.taxonRemarks.length>50?'…':''}</td>
+      <td title="${esc(r.descritor)}">${esc(r.descritor.substring(0,45))||'—'}${r.descritor.length>45?'…':''}</td>
+    </tr>`;
+  });
+  tbody.innerHTML = html.join('');
+}
+
+// ── RENDER TABLE 2 (DwC full) ──────────────────────────────────────────────────
+function renderTable2(rows) {
+  const tbody = document.getElementById('result-body2');
+  if (!rows.length) { tbody.innerHTML = ''; return; }
+
+  const html = rows.map((r, i) => {
+    const qualifier = r.statusBusca === 'Nao encontrado' ? '?' : (r.identificationQualifier || '');
+    const firstNome = r.vernacularName ? r.vernacularName.split(/[,;|]/)[0].trim() : '';
+    return `<tr>
+      <td>${i+1}</td>
+      <td>${esc(r.kingdom)||'Animalia'}</td>
+      <td>${esc(r.phylum)||'Chordata'}</td>
+      <td>${esc(r.classRank)||'Reptilia'}</td>
+      ${cell(r.order)}
+      ${cell(r.family)}
+      <td style="font-style:italic">${esc(r.genus)||'—'}</td>
+      <td style="font-style:italic">${esc(r.specificEpithet)||'—'}</td>
+      ${cell(r.infraspecificEpithet)}
+      <td>${esc(qualifier)||'—'}</td>
+      <td style="font-style:italic;font-weight:500" title="${esc(r.scientificName)}">${esc(r.scientificName.substring(0,55))||'—'}${r.scientificName.length>55?'…':''}</td>
+      <td title="${esc(r.vernacularName)}">${esc(firstNome)||'—'}</td>
+      <td>${rankBadge(r.taxonRank)}</td>
+      <td title="${esc(r.taxonRemarks)}">${esc(r.taxonRemarks.substring(0,50))||'—'}${r.taxonRemarks.length>50?'…':''}</td>
+      <td title="${esc(r.descritor)}">${esc(r.descritor.substring(0,45))||'—'}${r.descritor.length>45?'…':''}</td>
+    </tr>`;
+  });
+  tbody.innerHTML = html.join('');
+}
+
+// ── RENDER TABLE 3 (DwC clean — no search column) ─────────────────────────────
+function renderTable3(rows) {
+  const tbody = document.getElementById('result-body3');
+  if (!rows.length) { tbody.innerHTML = ''; return; }
+
+  // Only show found items in Table 3 (publication-ready)
+  const found = rows.filter(r => r.statusBusca !== 'Nao encontrado');
+  if (!found.length) { tbody.innerHTML = '<tr><td colspan="15" style="text-align:center;padding:18px;color:var(--muted);font-style:italic">Nenhum táxon encontrado</td></tr>'; return; }
+
+  const html = found.map((r, i) => {
+    const firstNome = r.vernacularName ? r.vernacularName.split(/[,;|]/)[0].trim() : '';
+    return `<tr>
+      <td>${i+1}</td>
+      <td>${esc(r.kingdom)||'Animalia'}</td>
+      <td>${esc(r.phylum)||'Chordata'}</td>
+      <td>${esc(r.classRank)||'Reptilia'}</td>
+      ${cell(r.order)}
+      ${cell(r.family)}
+      <td style="font-style:italic">${esc(r.genus)||'—'}</td>
+      <td style="font-style:italic">${esc(r.specificEpithet)||'—'}</td>
+      ${cell(r.infraspecificEpithet)}
+      ${cell(r.identificationQualifier)}
+      <td style="font-style:italic;font-weight:500" title="${esc(r.scientificName)}">${esc(r.scientificName.substring(0,55))||'—'}${r.scientificName.length>55?'…':''}</td>
+      <td title="${esc(r.vernacularName)}">${esc(firstNome)||'—'}</td>
+      <td>${rankBadge(r.taxonRank)}</td>
+      <td title="${esc(r.taxonRemarks)}">${esc(r.taxonRemarks.substring(0,50))||'—'}${r.taxonRemarks.length>50?'…':''}</td>
+      <td title="${esc(r.descritor)}">${esc(r.descritor.substring(0,45))||'—'}${r.descritor.length>45?'…':''}</td>
+    </tr>`;
+  });
+  tbody.innerHTML = html.join('');
+}
+
+// ── STATS ─────────────────────────────────────────────────────────────────────
+function renderStats(total, found, notFound) {
+  const bar = document.getElementById('stats-bar');
+  bar.innerHTML = `
+    <span>Consultas: <span class="pill">${total}</span></span>
+    <span>Encontrados: <span class="pill">${found}</span></span>
+    ${notFound ? `<span>Não encontrados: <span class="pill red">${notFound}</span></span>` : ''}
+  `;
+}
+
+// ── MAIN SEARCH ───────────────────────────────────────────────────────────────
+function runSearch() {
+  const btn = document.getElementById('btn-search');
+  btn.disabled = true;
+  document.getElementById('loading').style.display = 'block';
+  setTimeout(() => {
+    doSearch();
+    document.getElementById('loading').style.display = 'none';
+    btn.disabled = false;
+  }, 30);
+}
+
+function doSearch() {
+  if (!anyDataLoaded()) return;
+  const names = document.getElementById('names').value.split('\n').map(s => s.trim()).filter(Boolean);
+  if (!names.length) { clearResults(); return; }
+
+  lastResults = [];
+  let found = 0, notFound = 0;
+
+  for (const name of names) {
+    const { rows, tipo } = searchName(name);
+    if (!rows.length) {
+      notFound++;
+      lastResults.push({
+        nomeDigitado: name, tipo: 'Não encontrado', statusBusca: 'Nao encontrado',
+        kingdom:'',phylum:'',classRank:'',order:'',family:'',genus:'',
+        specificEpithet:'',infraspecificEpithet:'',identificationQualifier:'',
+        scientificName:'',vernacularName:'',taxonRank:'',taxonRemarks:'',descritor:''
+      });
+    } else {
+      found += rows.length;
+      for (const row of rows) {
+        const r = buildResult(row, name, tipo);
+        r.statusBusca = 'encontrado';
+        lastResults.push(r);
+      }
+    }
+  }
+
+  const display = getDisplayRows(lastResults);
+  renderTable(display);
+  renderTable2(display);
+  renderTable3(display);
+  renderStats(names.length, found, notFound);
+  document.getElementById('results-section').style.display = 'block';
+  document.getElementById('btn-export').disabled = false;
+}
+
+function runLiveSearch() {
+  if (!anyDataLoaded()) return;
+  const names = document.getElementById('names').value.split('\n').map(s=>s.trim()).filter(Boolean);
+  if (!names.length) { clearResults(); return; }
+  doSearch();
+}
+
+// ── DISPLAY MODE ──────────────────────────────────────────────────────────────
+function setMode(mode) {
+  displayMode = mode;
+  document.getElementById('btn-mode-one').classList.toggle('mode-active', mode==='one');
+  document.getElementById('btn-mode-all').classList.toggle('mode-active', mode==='all');
+  refreshDisplay();
+}
+
+function getDisplayRows(rows) {
+  if (displayMode === 'all') return rows;
+  const seen = new Map();
+  for (const r of rows) {
+    if (!seen.has(r.nomeDigitado)) seen.set(r.nomeDigitado, r);
+  }
+  return [...seen.values()];
+}
+
+function refreshDisplay() {
+  if (!lastResults.length) return;
+  const display = getDisplayRows(lastResults);
+  renderTable(display);
+  renderTable2(display);
+  renderTable3(display);
+  const names = [...new Set(lastResults.map(r => r.nomeDigitado))];
+  const found = display.filter(r => r.statusBusca !== 'Nao encontrado').length;
+  const nf    = display.filter(r => r.statusBusca === 'Nao encontrado').length;
+  renderStats(names.length, found, nf);
+}
+
+// ── COPY ──────────────────────────────────────────────────────────────────────
+function copyTable(tableNum) {
+  if (!lastResults.length) return;
+  const display = getDisplayRows(lastResults);
+  let tsv = '';
+
+  if (tableNum === 1) {
+    const headers = [
+      '#','Busca','Tipo','Ordem','Família','Gênero','Epíteto Específico',
+      'Epíteto Infraespecífico','Qualificador','Nome Científico','Nome Popular',
+      'Rank','Observações (taxonRemarks)','Descritor'
+    ];
+    const dataRows = display.map((r,i) => [
+      i+1,r.nomeDigitado,r.tipo,r.order,r.family,r.genus,r.specificEpithet,
+      r.infraspecificEpithet,r.identificationQualifier,r.scientificName,
+      r.vernacularName,r.taxonRank,r.taxonRemarks,r.descritor
+    ]);
+    tsv = [headers,...dataRows].map(row=>row.map(c=>String(c??'').replace(/\t/g,' ')).join('\t')).join('\r\n');
+  } else if (tableNum === 2) {
+    const headers = [
+      '#','kingdom','phylum','class','order','family','genus','specificEpithet',
+      'infraspecificEpithet','identificationQualifier','scientificName',
+      'vernacularName','taxonRank','taxonRemarks','Descriptor'
+    ];
+    const dataRows = display.map((r,i) => {
+      const qualifier = r.statusBusca==='Nao encontrado' ? '?' : (r.identificationQualifier||'');
+      const firstNome = r.vernacularName ? r.vernacularName.split(/[,;|]/)[0].trim() : '';
+      return [i+1,r.kingdom||'Animalia',r.phylum||'Chordata',r.classRank||'',
+              r.order,r.family,r.genus,r.specificEpithet,r.infraspecificEpithet,
+              qualifier,r.scientificName,firstNome,r.taxonRank,r.taxonRemarks,r.descritor];
+    });
+    tsv = [headers,...dataRows].map(row=>row.map(c=>String(c??'').replace(/\t/g,' ')).join('\t')).join('\r\n');
+  } else {
+    // Table 3 — clean, only found
+    const found = display.filter(r => r.statusBusca !== 'Nao encontrado');
+    const headers = [
+      '#','kingdom','phylum','class','order','family','genus','specificEpithet',
+      'infraspecificEpithet','identificationQualifier','scientificName',
+      'vernacularName','taxonRank','taxonRemarks','Descriptor'
+    ];
+    const dataRows = found.map((r,i) => {
+      const firstNome = r.vernacularName ? r.vernacularName.split(/[,;|]/)[0].trim() : '';
+      return [i+1,r.kingdom||'Animalia',r.phylum||'Chordata',r.classRank||'',
+              r.order,r.family,r.genus,r.specificEpithet,r.infraspecificEpithet,
+              r.identificationQualifier,r.scientificName,firstNome,r.taxonRank,r.taxonRemarks,r.descritor];
+    });
+    tsv = [headers,...dataRows].map(row=>row.map(c=>String(c??'').replace(/\t/g,' ')).join('\t')).join('\r\n');
+  }
+
+  const btnId = `btn-copy-${tableNum}`;
+  navigator.clipboard.writeText(tsv).then(() => {
+    const btn = document.getElementById(btnId);
+    const orig = btn.textContent;
+    btn.textContent = '✅ Copiado!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = orig; btn.classList.remove('copied'); }, 2000);
+  }).catch(() => {
+    const ta2 = document.createElement('textarea');
+    ta2.value = tsv;
+    ta2.style.position = 'fixed'; ta2.style.opacity = '0';
+    document.body.appendChild(ta2);
+    ta2.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta2);
+    const btn = document.getElementById(btnId);
+    btn.textContent = '✅ Copiado!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = `📋 Copiar Tabela ${tableNum} para Excel`; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+// ── EXPORT EXCEL ──────────────────────────────────────────────────────────────
+function exportExcel() {
+  if (!lastResults.length) return;
+  const display = getDisplayRows(lastResults);
+
+  // Sheet 1: Main results
+  const h1 = ['#','Busca','Tipo','Ordem','Família','Gênero','Epíteto Específico',
+    'Epíteto Infraespecífico','Qualificador','Nome Científico','Nome Popular',
+    'Rank','Observações','Descritor'];
+  const d1 = [h1, ...display.map((r,i)=>[
+    i+1,r.nomeDigitado,r.tipo,r.order,r.family,r.genus,r.specificEpithet,
+    r.infraspecificEpithet,r.identificationQualifier,r.scientificName,
+    r.vernacularName,r.taxonRank,r.taxonRemarks,r.descritor
+  ])];
+
+  // Sheet 2: DwC
+  const h2 = ['#','kingdom','phylum','class','order','family','genus','specificEpithet',
+    'infraspecificEpithet','identificationQualifier','scientificName',
+    'vernacularName','taxonRank','taxonRemarks','Descriptor'];
+  const d2 = [h2, ...display.map((r,i)=>{
+    const q = r.statusBusca==='Nao encontrado' ? '?' : (r.identificationQualifier||'');
+    const fn = r.vernacularName ? r.vernacularName.split(/[,;|]/)[0].trim() : '';
+    return [i+1,r.kingdom||'Animalia',r.phylum||'Chordata',r.classRank||'',
+      r.order,r.family,r.genus,r.specificEpithet,r.infraspecificEpithet,
+      q,r.scientificName,fn,r.taxonRank,r.taxonRemarks,r.descritor];
+  })];
+
+  // Sheet 3: DwC clean
+  const found = display.filter(r => r.statusBusca !== 'Nao encontrado');
+  const d3 = [h2, ...found.map((r,i)=>{
+    const fn = r.vernacularName ? r.vernacularName.split(/[,;|]/)[0].trim() : '';
+    return [i+1,r.kingdom||'Animalia',r.phylum||'Chordata',r.classRank||'',
+      r.order,r.family,r.genus,r.specificEpithet,r.infraspecificEpithet,
+      r.identificationQualifier,r.scientificName,fn,r.taxonRank,r.taxonRemarks,r.descritor];
+  })];
+
+  const ws1 = XLSX.utils.aoa_to_sheet(d1);
+  const ws2 = XLSX.utils.aoa_to_sheet(d2);
+  const ws3 = XLSX.utils.aoa_to_sheet(d3);
+  ws1['!cols'] = [{wch:4},{wch:22},{wch:18},{wch:16},{wch:18},{wch:16},{wch:18},{wch:18},{wch:14},{wch:32},{wch:24},{wch:12},{wch:30},{wch:28}];
+  ws2['!cols'] = [{wch:4},{wch:10},{wch:10},{wch:10},{wch:16},{wch:18},{wch:16},{wch:18},{wch:18},{wch:14},{wch:32},{wch:24},{wch:12},{wch:30},{wch:28}];
+  ws3['!cols'] = ws2['!cols'];
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws1, 'Resultados');
+  XLSX.utils.book_append_sheet(wb, ws2, 'DarwinCore');
+  XLSX.utils.book_append_sheet(wb, ws3, 'DarwinCore_Limpo');
+  XLSX.writeFile(wb, 'taxons_brasil_busca.xlsx');
+}
+
+// ── CLEAR ─────────────────────────────────────────────────────────────────────
+function clearResults() {
+  document.getElementById('result-body').innerHTML   = '';
+  document.getElementById('result-body2').innerHTML  = '';
+  document.getElementById('result-body3').innerHTML  = '';
+  document.getElementById('stats-bar').innerHTML     = '';
+  document.getElementById('results-section').style.display = 'none';
+  document.getElementById('btn-export').disabled = true;
+  lastResults = [];
+}
+
+// ── SPECIES SUGGESTER ─────────────────────────────────────────────────────────
+let suggActive = -1;
+let suggItems  = [];
+const MAX_SUGG = 50;
+
+function buildSuggestions(query) {
+  if (!anyDataLoaded() || !query || query.length < 2) return [];
+  const norm = normalize(query);
+  const seen = new Set();
+  const results = [];
+
+  const addRows = (arr, matchType) => {
+    for (const row of arr) {
+      const key = row['scientificName'] || '';
+      if (seen.has(key)) continue;
+      seen.add(key);
+      const nomes = String(row['vernacularName'] || '');
+      const firstNome = nomes.split(/[,;|]/)[0].trim();
+      results.push({ binomio: key, vernacular: firstNome, rank: row['taxonRank']||'', matchType });
+      if (results.length >= MAX_SUGG) return true;
+    }
+    return false;
+  };
+
+  const allVern = [vernacularIndex, vernacularIndexA];
+  const allSci  = [scientificIndex,  scientificIndexA];
+
+  for (const idx of allVern) { if (idx.has(norm)) { if (addRows(idx.get(norm), 'vernacular')) return results; } }
+  for (const idx of allSci)  { if (idx.has(norm)) { if (addRows(idx.get(norm), 'scientific')) return results; } }
+  for (const idx of allVern) {
+    for (const [key, arr] of idx) { if (key !== norm && key.includes(norm)) { if (addRows(arr, 'vernacular')) return results; } }
+  }
+  for (const idx of allSci) {
+    for (const [key, arr] of idx) { if (key !== norm && key.startsWith(norm)) { if (addRows(arr, 'scientific')) return results; } }
+  }
+  if (results.length < MAX_SUGG) {
+    for (const idx of allSci) {
+      for (const [key, arr] of idx) {
+        if (key !== norm && !key.startsWith(norm) && key.includes(norm)) {
+          if (addRows(arr, 'scientific')) return results;
+          if (results.length >= MAX_SUGG) break;
+        }
+      }
+    }
+  }
+  return results;
+}
+
+function getLastLine(val) {
+  const lines = val.split('\n');
+  return lines[lines.length - 1].trim();
+}
+
+function showSuggester(items) {
+  const panel = document.getElementById('suggester-panel');
+  const list  = document.getElementById('sugg-list');
+  const count = document.getElementById('sugg-count');
+  suggItems = items;
+  suggActive = -1;
+
+  if (!items.length) { panel.classList.remove('visible'); return; }
+
+  count.textContent = items.length >= MAX_SUGG ? `${MAX_SUGG}+ resultados` : `${items.length} resultado${items.length!==1?'s':''}`;
+
+  list.innerHTML = items.map((it, idx) => {
+    const badge = it.rank ? `<span class="sugg-badge">${esc(it.rank)}</span>` : '';
+    return `<div class="sugg-item" role="option" data-idx="${idx}" data-binomio="${esc(it.binomio)}" onmousedown="selectSuggestion(${idx},event)">
+      <span class="sugg-vernacular">${esc(it.vernacular || it.binomio)}</span>
+      <span class="sugg-scientific">${esc(it.binomio)}</span>
+      ${badge}
+    </div>`;
+  }).join('');
+
+  panel.classList.add('visible');
+}
+
+function closeSuggester() {
+  document.getElementById('suggester-panel').classList.remove('visible');
+  suggItems = [];
+  suggActive = -1;
+}
+
+function selectSuggestion(idx, e) {
+  if (e) e.preventDefault();
+  const item = suggItems[idx];
+  if (!item) return;
+  const ta = document.getElementById('names');
+  const lines = ta.value.split('\n');
+  const chosen = item.vernacular || item.binomio;
+  lines[lines.length - 1] = chosen;
+  ta.value = lines.join('\n');
+  closeSuggester();
+  ta.focus();
+  setTimeout(runLiveSearch, 0);
+}
+
+function moveSuggester(dir) {
+  const items = document.querySelectorAll('#sugg-list .sugg-item');
+  if (!items.length) return false;
+  if (suggActive >= 0) items[suggActive].classList.remove('sugg-active');
+  suggActive = Math.max(0, Math.min(items.length - 1, suggActive + dir));
+  items[suggActive].classList.add('sugg-active');
+  items[suggActive].scrollIntoView({ block: 'nearest' });
+  return true;
+}
+
+// ── LIVE SEARCH EVENTS ────────────────────────────────────────────────────────
+const namesTA = document.getElementById('names');
+
+namesTA.addEventListener('keydown', e => {
+  const panel = document.getElementById('suggester-panel');
+  if (panel.classList.contains('visible')) {
+    if (e.key === 'ArrowDown') { e.preventDefault(); moveSuggester(1); return; }
+    if (e.key === 'ArrowUp')   { e.preventDefault(); moveSuggester(-1); return; }
+    if (e.key === 'Enter' && suggActive >= 0) { selectSuggestion(suggActive, e); return; }
+    if (e.key === 'Escape') { closeSuggester(); return; }
+  }
+  if (e.ctrlKey && e.key === 'Enter') runSearch();
+  if (e.key === 'Enter') setTimeout(runLiveSearch, 0);
+});
+
+namesTA.addEventListener('paste', () => {
+  setTimeout(() => {
+    namesTA.selectionStart = namesTA.selectionEnd = namesTA.value.length;
+    closeSuggester();
+    runLiveSearch();
+  }, 0);
+});
+
+let _liveTimer = null;
+namesTA.addEventListener('input', () => {
+  clearTimeout(_liveTimer);
+  _liveTimer = setTimeout(() => {
+    const lastLine = getLastLine(namesTA.value);
+    if (lastLine.length >= 2) {
+      const suggs = buildSuggestions(lastLine);
+      showSuggester(suggs);
+    } else {
+      closeSuggester();
+    }
+    runLiveSearch();
+  }, 100);
+});
+
+namesTA.addEventListener('blur', () => {
+  setTimeout(closeSuggester, 200);
+});
+
+document.addEventListener('click', e => {
+  const panel = document.getElementById('suggester-panel');
+  if (!panel.contains(e.target) && e.target !== namesTA) closeSuggester();
+});
+</script>
+</body>
+</html>
